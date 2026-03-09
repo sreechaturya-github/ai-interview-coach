@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PrepCoach — AI Interview Trainer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Instrument+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --cream: #f5f0e8;
+      --paper: #faf7f2;
+      --ink: #1a1612;
+      --ink2: #3d3830;
+      --muted: #9a9080;
+      --border: #ddd8cc;
+      --green: #1e4d3b;
+      --green-light: #e8f0ec;
+      --orange: #c4622d;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Instrument Sans', sans-serif;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(30,77,59,0.04) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(196,98,45,0.04) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    header {
+      background: var(--green);
+      padding: 1rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #f5f0e8;
+      letter-spacing: -0.02em;
+    }
+
+    .logo span { color: #8fbc9e; }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
+
+    .header-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: #8fbc9e;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .bookmark-header-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #f5f0e8;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      padding: 0.4rem 0.9rem;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .bookmark-header-btn:hover { background: rgba(255,255,255,0.2); }
+
+    .bookmark-badge {
+      background: var(--orange);
+      color: white;
+      font-size: 0.6rem;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3.5rem 2rem 6rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2.5rem;
+    }
+
+    .hero-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 0.8rem;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 em { font-style: italic; color: var(--green); }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      max-width: 520px;
+      line-height: 1.7;
+    }
+
+    .jd-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    textarea {
+      width: 100%;
+      background: white;
+      border: 1.5px solid var(--border);
+      color: var(--ink);
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 0.88rem;
+      padding: 1.1rem 1.3rem;
+      border-radius: 10px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      line-height: 1.75;
+    }
+
+    textarea:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(30,77,59,0.08);
+    }
+
+    textarea::placeholder { color: #c0b8ac; }
+
+    /* DIFFICULTY TOGGLE */
+    .difficulty-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .difficulty-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .difficulty-toggle {
+      display: flex;
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .diff-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      padding: 0.45rem 1.1rem;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all 0.18s;
+      letter-spacing: 0.05em;
+    }
+
+    .diff-btn:hover { color: var(--ink); }
+
+    .diff-btn.active-easy   { background: #e8f5e9; color: #2d7a4f; font-weight: 600; }
+    .diff-btn.active-medium { background: #fff8e1; color: #b8860b; font-weight: 600; }
+    .diff-btn.active-hard   { background: #fdecea; color: #b83232; font-weight: 600; }
+
+    /* BUTTONS */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--green);
+      color: #f5f0e8;
+      font-family: 'Instrument Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 0.8rem 2rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.2s;
+      margin-top: 1.2rem;
+    }
+
+    .btn-primary:hover { background: #163829; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: transparent;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      padding: 0.4rem 0;
+      border: none;
+      cursor: pointer;
+      transition: color 0.2s;
+      margin-top: 0.8rem;
+    }
+
+    .btn-ghost:hover { color: var(--ink); }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: white;
+      color: var(--ink2);
+      font-family: 'Instrument Sans', sans-serif;
+      font-weight: 500;
+      font-size: 0.82rem;
+      padding: 0.65rem 1.4rem;
+      border-radius: 7px;
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      margin-top: 1rem;
+    }
+
+    .btn-secondary:hover { border-color: var(--green); background: var(--green-light); }
+
+    #step2 { animation: fadeUp 0.35s ease; }
+
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    @media (max-width: 640px) { .category-grid { grid-template-columns: 1fr; } }
+
+    .cat-card {
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem 1.3rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .cat-card:hover { border-color: var(--green); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+    .cat-card.active { border-color: var(--green); background: var(--green-light); }
+
+    .cat-icon { font-size: 1.8rem; margin-bottom: 0.7rem; }
+
+    .cat-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.3rem;
+    }
+
+    .cat-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+
+    .cat-count {
+      display: inline-block;
+      margin-top: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--green);
+      background: var(--green-light);
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+    }
+
+    /* DIFFICULTY PILL on category */
+    .diff-pill {
+      display: inline-block;
+      margin-top: 0.4rem;
+      margin-left: 0.3rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.58rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+    }
+
+    .diff-pill.easy   { background: #e8f5e9; color: #2d7a4f; }
+    .diff-pill.medium { background: #fff8e1; color: #b8860b; }
+    .diff-pill.hard   { background: #fdecea; color: #b83232; }
+
+    #questions-panel { animation: fadeUp 0.3s ease; }
+
+    .questions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+
+    .q-item {
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      padding: 1rem 1.3rem;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      transition: all 0.18s;
+      position: relative;
+    }
+
+    .q-item:hover { border-color: #aaa; background: #fdfcfa; }
+    .q-item.selected { border-color: var(--green); background: var(--green-light); }
+    .q-item.bookmarked { border-color: #f0c060; background: #fffdf0; }
+    .q-item.bookmarked.selected { border-color: var(--green); background: var(--green-light); }
+
+    .q-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      min-width: 20px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .q-text { font-size: 0.87rem; line-height: 1.6; color: var(--ink2); flex: 1; }
+
+    .bookmark-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0;
+      flex-shrink: 0;
+      opacity: 0.35;
+      transition: opacity 0.2s, transform 0.15s;
+      margin-top: 1px;
+    }
+
+    .bookmark-btn:hover { opacity: 0.8; transform: scale(1.15); }
+    .bookmark-btn.active { opacity: 1; }
+
+    /* BOOKMARKS PANEL */
+    #bookmarks-panel {
+      position: fixed;
+      top: 0; right: 0;
+      width: 380px;
+      height: 100vh;
+      background: var(--paper);
+      border-left: 1.5px solid var(--border);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 30px rgba(0,0,0,0.08);
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+
+    #bookmarks-panel.open { transform: translateX(0); }
+
+    .bp-header {
+      background: var(--green);
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .bp-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #f5f0e8;
+    }
+
+    .bp-close {
+      background: none;
+      border: none;
+      color: #8fbc9e;
+      font-size: 1.3rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    .bp-close:hover { color: #f5f0e8; }
+
+    .bp-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+    }
+
+    .bp-empty {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 3rem;
+      line-height: 1.7;
+    }
+
+    .bp-empty .bp-empty-icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+
+    .bp-item {
+      background: white;
+      border: 1.5px solid #f0c060;
+      border-radius: 9px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .bp-item:hover { border-color: var(--green); }
+
+    .bp-item-cat {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .bp-item-text {
+      font-size: 0.83rem;
+      line-height: 1.55;
+      color: var(--ink2);
+    }
+
+    .bp-remove {
+      background: none;
+      border: none;
+      color: #ccc;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: color 0.2s;
+    }
+
+    .bp-remove:hover { color: #b83232; }
+
+    #answer-section { animation: fadeUp 0.3s ease; }
+
+    .selected-q-box {
+      background: white;
+      border: 1.5px solid var(--green);
+      border-radius: 10px;
+      padding: 1.1rem 1.3rem;
+      margin-bottom: 1.2rem;
+      font-size: 0.88rem;
+      line-height: 1.65;
+      color: var(--ink);
+      font-style: italic;
+      position: relative;
+    }
+
+    .selected-q-box::before {
+      content: '"';
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      color: var(--green);
+      opacity: 0.2;
+      position: absolute;
+      top: -0.5rem;
+      left: 0.8rem;
+      line-height: 1;
+    }
+
+    #feedback-section { animation: fadeUp 0.35s ease; }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      background: var(--green);
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 1.5rem;
+      color: #f5f0e8;
+    }
+
+    .score-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 900;
+      line-height: 1;
+      color: #8fbc9e;
+    }
+
+    .score-denom {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: #8fbc9e;
+    }
+
+    .verdict-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #f5f0e8;
+    }
+
+    .verdict-sub { font-size: 0.78rem; color: #8fbc9e; margin-top: 0.2rem; }
+
+    .feedback-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    @media (max-width: 600px) { .feedback-cols { grid-template-columns: 1fr; } }
+
+    .fb-card {
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 1.1rem 1.3rem;
+    }
+
+    .fb-card-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+    }
+
+    .fb-card.strengths .fb-card-title { color: #2d7a4f; }
+    .fb-card.improvements .fb-card-title { color: var(--orange); }
+    .fb-card ul { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .fb-card li {
+      font-size: 0.83rem;
+      line-height: 1.55;
+      color: var(--ink2);
+      display: flex;
+      gap: 0.6rem;
+      align-items: flex-start;
+    }
+
+    .fb-card.strengths li::before { content: '✓'; color: #2d7a4f; flex-shrink: 0; font-weight: 700; }
+    .fb-card.improvements li::before { content: '→'; color: var(--orange); flex-shrink: 0; }
+
+    .model-answer-box {
+      background: white;
+      border: 1.5px solid var(--border);
+      border-left: 4px solid var(--green);
+      border-radius: 10px;
+      padding: 1.2rem 1.4rem;
+    }
+
+    .model-answer-box .fb-card-title { color: var(--green); font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.7rem; }
+    .model-answer-box p { font-size: 0.87rem; line-height: 1.8; color: var(--ink2); }
+
+    .loader {
+      display: inline-block;
+      width: 15px; height: 15px;
+      border: 2px solid rgba(245,240,232,0.4);
+      border-top-color: #f5f0e8;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    .divider { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">Prep<span>Coach</span></div>
+    <div class="header-right">
+      <div class="header-tag">AI Interview Trainer</div>
+      <button class="bookmark-header-btn" onclick="toggleBookmarksPanel()">
+        🔖 Bookmarks <span class="bookmark-badge" id="bookmark-count">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- BOOKMARKS SIDE PANEL -->
+  <div id="bookmarks-panel">
+    <div class="bp-header">
+      <span class="bp-title">Bookmarked Questions</span>
+      <button class="bp-close" onclick="toggleBookmarksPanel()">✕</button>
+    </div>
+    <div class="bp-body" id="bp-body">
+      <div class="bp-empty">
+        <div class="bp-empty-icon">🔖</div>
+        No bookmarks yet.<br/>Click the bookmark icon on any question to save it here.
+      </div>
+    </div>
+  </div>
+
+  <main>
+
+    <div class="hero">
+      <p class="hero-label">Your AI-Powered Coach</p>
+      <h1>Ace your next<br><em>interview.</em></h1>
+      <p>Paste a job description, set your difficulty, choose a category, and practice with real questions tailored to the role.</p>
+    </div>
+
+    <!-- STEP 1 -->
+    <section id="step1">
+      <span class="jd-label">01 — Job Description</span>
+      <textarea id="jd-input" rows="8" placeholder="Paste the job description here. The more detail you include, the more relevant your questions will be..."></textarea>
+
+      <div class="difficulty-row">
+        <span class="difficulty-label">Difficulty:</span>
+        <div class="difficulty-toggle">
+          <button class="diff-btn active-easy" id="diff-easy" onclick="setDifficulty('Easy')">Easy</button>
+          <button class="diff-btn" id="diff-medium" onclick="setDifficulty('Medium')">Medium</button>
+          <button class="diff-btn" id="diff-hard" onclick="setDifficulty('Hard')">Hard</button>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="generate-btn" onclick="generateQuestions()">
+        <span id="gen-btn-text">Generate Questions</span>
+        <span class="loader hidden" id="gen-loader"></span>
+      </button>
+    </section>
+
+    <!-- STEP 2 -->
+    <section id="step2" class="hidden">
+      <hr class="divider"/>
+      <div class="section-label" id="step2-label">02 — Choose a Category</div>
+
+      <div class="category-grid">
+        <div class="cat-card" id="cat-technical" onclick="selectCategory('Technical')">
+          <div class="cat-icon">⚙️</div>
+          <div class="cat-title">Technical</div>
+          <div class="cat-desc">Skills, tools & concepts specific to the role</div>
+          <span class="cat-count">5 questions</span>
+          <span class="diff-pill" id="pill-technical"></span>
+        </div>
+        <div class="cat-card" id="cat-behavioral" onclick="selectCategory('Behavioral')">
+          <div class="cat-icon">💬</div>
+          <div class="cat-title">Behavioral</div>
+          <div class="cat-desc">Past experience using the STAR method</div>
+          <span class="cat-count">5 questions</span>
+          <span class="diff-pill" id="pill-behavioral"></span>
+        </div>
+        <div class="cat-card" id="cat-situational" onclick="selectCategory('Situational')">
+          <div class="cat-icon">🧩</div>
+          <div class="cat-title">Situational</div>
+          <div class="cat-desc">Hypothetical workplace scenarios</div>
+          <span class="cat-count">5 questions</span>
+          <span class="diff-pill" id="pill-situational"></span>
+        </div>
+      </div>
+
+      <!-- Questions Panel -->
+      <div id="questions-panel" class="hidden">
+        <div class="section-label" id="questions-panel-label">Technical Questions</div>
+        <div class="questions-list" id="questions-list"></div>
+
+        <button class="btn-secondary hidden" id="more-btn" onclick="loadMoreQuestions()" style="margin-top:1rem;">
+          <span id="more-btn-text">+ Load More Questions</span>
+          <span class="loader hidden" id="more-loader" style="border-color:rgba(0,0,0,0.2);border-top-color:var(--ink);"></span>
+        </button>
+      </div>
+
+      <button class="btn-ghost" onclick="resetToStep1()">← Change job description</button>
+
+      <!-- STEP 3 -->
+      <div id="answer-section" class="hidden">
+        <hr class="divider"/>
+        <div class="section-label">03 — Your Answer</div>
+        <div class="selected-q-box" id="selected-q-display"></div>
+        <textarea id="answer-input" rows="6" placeholder="Write your answer here. For behavioral questions, use the STAR method — Situation, Task, Action, Result."></textarea>
+        <button class="btn-primary" id="eval-btn" onclick="evaluateAnswer()">
+          <span id="eval-btn-text">Evaluate My Answer</span>
+          <span class="loader hidden" id="eval-loader"></span>
+        </button>
+
+        <!-- STEP 4 -->
+        <div id="feedback-section" class="hidden">
+          <hr class="divider"/>
+          <div class="section-label">04 — Your Feedback</div>
+
+          <div class="score-row">
+            <div>
+              <div class="score-num" id="fb-score">—</div>
+              <div class="score-denom">/10</div>
+            </div>
+            <div>
+              <div class="verdict-text" id="fb-verdict"></div>
+              <div class="verdict-sub">AI Coach Assessment</div>
+            </div>
+          </div>
+
+          <div class="feedback-cols">
+            <div class="fb-card strengths">
+              <div class="fb-card-title">Strengths</div>
+              <ul id="fb-strengths"></ul>
+            </div>
+            <div class="fb-card improvements">
+              <div class="fb-card-title">To Improve</div>
+              <ul id="fb-improvements"></ul>
+            </div>
+          </div>
+
+          <div class="model-answer-box">
+            <div class="fb-card-title">Model Answer</div>
+            <p id="fb-sample"></p>
+          </div>
+
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.5rem;">
+            <button class="btn-primary" onclick="tryAnotherQuestion()">Try Another Question →</button>
+            <button class="btn-secondary" onclick="switchCategory()">Switch Category</button>
+            <button class="btn-ghost" onclick="resetAll()">← Start Over</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const API = "http://localhost:8000";
+    let jobDescription = "";
+    let allQuestions = {};
+    let selectedCategory = "";
+    let selectedQuestion = "";
+    let currentDifficulty = "Easy";
+    let bookmarks = []; // { question, category }
+
+    // ---- DIFFICULTY ----
+    function setDifficulty(level) {
+      currentDifficulty = level;
+      ["Easy", "Medium", "Hard"].forEach(l => {
+        const btn = document.getElementById(`diff-${l.toLowerCase()}`);
+        btn.className = "diff-btn";
+        if (l === level) btn.classList.add(`active-${l.toLowerCase()}`);
+      });
+    }
+
+    // ---- GENERATE ----
+    async function generateQuestions() {
+      const jd = document.getElementById("jd-input").value.trim();
+      if (!jd) return alert("Please paste a job description first.");
+      jobDescription = jd;
+
+      const btn = document.getElementById("generate-btn");
+      const txt = document.getElementById("gen-btn-text");
+      const loader = document.getElementById("gen-loader");
+      btn.disabled = true; txt.textContent = "Generating..."; loader.classList.remove("hidden");
+
+      try {
+        const res = await fetch(`${API}/generate-questions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ job_description: jd, difficulty: currentDifficulty })
+        });
+        const data = await res.json();
+        if (data.error) return alert("Error: " + data.error);
+
+        allQuestions = data.questions;
+
+        // Update difficulty pills on category cards
+        ["technical", "behavioral", "situational"].forEach(c => {
+          const pill = document.getElementById(`pill-${c}`);
+          pill.textContent = currentDifficulty;
+          pill.className = `diff-pill ${currentDifficulty.toLowerCase()}`;
+        });
+
+        document.querySelectorAll(".cat-card").forEach(c => c.classList.remove("active"));
+        document.getElementById("questions-panel").classList.add("hidden");
+        document.getElementById("more-btn").classList.add("hidden");
+        document.getElementById("answer-section").classList.add("hidden");
+        document.getElementById("feedback-section").classList.add("hidden");
+        document.getElementById("step2").classList.remove("hidden");
+        document.getElementById("step2").scrollIntoView({ behavior: "smooth" });
+
+      } catch (e) {
+        alert("Could not connect to backend. Make sure FastAPI is running on port 8000.");
+      } finally {
+        btn.disabled = false; txt.textContent = "Generate Questions"; loader.classList.add("hidden");
+      }
+    }
+
+    // ---- CATEGORY ----
+    function selectCategory(category) {
+      selectedCategory = category;
+      document.querySelectorAll(".cat-card").forEach(c => c.classList.remove("active"));
+      document.getElementById(`cat-${category.toLowerCase()}`).classList.add("active");
+
+      const questions = allQuestions[category] || [];
+      renderQuestionsList(questions);
+
+      document.getElementById("questions-panel-label").textContent = `${category} Questions`;
+      document.getElementById("questions-panel").classList.remove("hidden");
+      document.getElementById("more-btn").classList.remove("hidden");
+      document.getElementById("answer-section").classList.add("hidden");
+      document.getElementById("feedback-section").classList.add("hidden");
+      document.getElementById("questions-panel").scrollIntoView({ behavior: "smooth" });
+    }
+
+    function renderQuestionsList(questions, append = false) {
+      const list = document.getElementById("questions-list");
+      if (!append) list.innerHTML = "";
+      const startIndex = list.children.length;
+
+      questions.forEach((q, i) => {
+        const isBookmarked = bookmarks.some(b => b.question === q);
+        const item = document.createElement("div");
+        item.className = `q-item${isBookmarked ? " bookmarked" : ""}`;
+        item.dataset.question = q;
+        item.innerHTML = `
+          <span class="q-num">${String(startIndex + i + 1).padStart(2, '0')}</span>
+          <span class="q-text">${q}</span>
+          <button class="bookmark-btn ${isBookmarked ? 'active' : ''}"
+            title="${isBookmarked ? 'Remove bookmark' : 'Bookmark this question'}"
+            onclick="toggleBookmark(event, '${q.replace(/'/g, "\\'")}', this, arguments[0].currentTarget.parentElement)">
+            ${isBookmarked ? '🔖' : '🔖'}
+          </button>
+        `;
+        item.querySelector('.q-text').onclick = () => selectQuestion(item, q);
+        item.querySelector('.q-num').onclick = () => selectQuestion(item, q);
+        list.appendChild(item);
+      });
+    }
+
+    // ---- BOOKMARKS ----
+    function toggleBookmark(e, question, btn, card) {
+      e.stopPropagation();
+      const idx = bookmarks.findIndex(b => b.question === question);
+      if (idx === -1) {
+        bookmarks.push({ question, category: selectedCategory });
+        btn.classList.add("active");
+        card.classList.add("bookmarked");
+      } else {
+        bookmarks.splice(idx, 1);
+        btn.classList.remove("active");
+        card.classList.remove("bookmarked");
+      }
+      updateBookmarkCount();
+      renderBookmarksPanel();
+    }
+
+    function updateBookmarkCount() {
+      document.getElementById("bookmark-count").textContent = bookmarks.length;
+    }
+
+    function toggleBookmarksPanel() {
+      document.getElementById("bookmarks-panel").classList.toggle("open");
+    }
+
+    function renderBookmarksPanel() {
+      const body = document.getElementById("bp-body");
+      if (bookmarks.length === 0) {
+        body.innerHTML = `<div class="bp-empty"><div class="bp-empty-icon">🔖</div>No bookmarks yet.<br/>Click the bookmark icon on any question to save it here.</div>`;
+        return;
+      }
+
+      body.innerHTML = bookmarks.map((b, i) => `
+        <div class="bp-item" onclick="jumpToQuestion('${b.question.replace(/'/g, "\\'")}', '${b.category}')">
+          <div class="bp-item-cat">
+            ${b.category}
+            <button class="bp-remove" onclick="removeBookmark(event, ${i})">✕</button>
+          </div>
+          <div class="bp-item-text">${b.question}</div>
+        </div>
+      `).join("");
+    }
+
+    function removeBookmark(e, idx) {
+      e.stopPropagation();
+      bookmarks.splice(idx, 1);
+      updateBookmarkCount();
+      renderBookmarksPanel();
+      // Update card UI if visible
+      document.querySelectorAll(".q-item").forEach(card => {
+        const q = card.dataset.question;
+        const stillBookmarked = bookmarks.some(b => b.question === q);
+        if (!stillBookmarked) {
+          card.classList.remove("bookmarked");
+          const btn = card.querySelector(".bookmark-btn");
+          if (btn) btn.classList.remove("active");
+        }
+      });
+    }
+
+    function jumpToQuestion(question, category) {
+      toggleBookmarksPanel();
+      // Switch to correct category first
+      if (category !== selectedCategory) {
+        selectCategory(category);
+      }
+      // Find and click the question
+      setTimeout(() => {
+        const items = document.querySelectorAll(".q-item");
+        items.forEach(item => {
+          if (item.dataset.question === question) {
+            item.scrollIntoView({ behavior: "smooth", block: "center" });
+            selectQuestion(item, question);
+          }
+        });
+      }, 300);
+    }
+
+    // ---- SELECT QUESTION ----
+    function selectQuestion(item, question) {
+      document.querySelectorAll(".q-item").forEach(i => i.classList.remove("selected"));
+      item.classList.add("selected");
+      selectedQuestion = question;
+
+      document.getElementById("selected-q-display").textContent = question;
+      document.getElementById("answer-input").value = "";
+      document.getElementById("feedback-section").classList.add("hidden");
+      document.getElementById("answer-section").classList.remove("hidden");
+      document.getElementById("answer-section").scrollIntoView({ behavior: "smooth" });
+    }
+
+    // ---- LOAD MORE ----
+    async function loadMoreQuestions() {
+      const btn = document.getElementById("more-btn");
+      const txt = document.getElementById("more-btn-text");
+      const loader = document.getElementById("more-loader");
+      btn.disabled = true; txt.textContent = "Loading..."; loader.classList.remove("hidden");
+
+      const existing = Array.from(document.querySelectorAll(".q-text")).map(el => el.textContent);
+
+      try {
+        const res = await fetch(`${API}/more-questions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            job_description: jobDescription,
+            category: selectedCategory,
+            existing_questions: existing,
+            difficulty: currentDifficulty
+          })
+        });
+        const data = await res.json();
+        if (data.error) return alert("Error: " + data.error);
+        renderQuestionsList(data.questions, true);
+
+      } catch (e) {
+        alert("Could not connect to backend.");
+      } finally {
+        btn.disabled = false; txt.textContent = "+ Load More Questions"; loader.classList.add("hidden");
+      }
+    }
+
+    // ---- EVALUATE ----
+    async function evaluateAnswer() {
+      const answer = document.getElementById("answer-input").value.trim();
+      if (!answer || answer.length < 20) return alert("Please write a more detailed answer.");
+
+      const btn = document.getElementById("eval-btn");
+      const txt = document.getElementById("eval-btn-text");
+      const loader = document.getElementById("eval-loader");
+      btn.disabled = true; txt.textContent = "Evaluating..."; loader.classList.remove("hidden");
+
+      try {
+        const res = await fetch(`${API}/evaluate-answer`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ job_description: jobDescription, question: selectedQuestion, answer })
+        });
+        const data = await res.json();
+        if (data.error) return alert("Error: " + data.error);
+
+        renderFeedback(data.feedback);
+        document.getElementById("feedback-section").classList.remove("hidden");
+        document.getElementById("feedback-section").scrollIntoView({ behavior: "smooth" });
+
+      } catch (e) {
+        alert("Could not connect to backend.");
+      } finally {
+        btn.disabled = false; txt.textContent = "Evaluate My Answer"; loader.classList.add("hidden");
+      }
+    }
+
+    function renderFeedback(fb) {
+      document.getElementById("fb-score").textContent = fb.score;
+      document.getElementById("fb-verdict").textContent = fb.verdict;
+      document.getElementById("fb-strengths").innerHTML = (fb.strengths || []).map(s => `<li>${s}</li>`).join("");
+      document.getElementById("fb-improvements").innerHTML = (fb.improvements || []).map(s => `<li>${s}</li>`).join("");
+      document.getElementById("fb-sample").textContent = fb.sample_answer;
+    }
+
+    function tryAnotherQuestion() {
+      document.getElementById("feedback-section").classList.add("hidden");
+      document.getElementById("answer-section").classList.add("hidden");
+      document.querySelectorAll(".q-item").forEach(i => i.classList.remove("selected"));
+      document.getElementById("answer-input").value = "";
+      document.getElementById("questions-panel").scrollIntoView({ behavior: "smooth" });
+    }
+
+    function switchCategory() {
+      document.getElementById("answer-section").classList.add("hidden");
+      document.getElementById("feedback-section").classList.add("hidden");
+      document.getElementById("questions-panel").classList.add("hidden");
+      document.getElementById("more-btn").classList.add("hidden");
+      document.querySelectorAll(".cat-card").forEach(c => c.classList.remove("active"));
+      document.getElementById("step2").scrollIntoView({ behavior: "smooth" });
+    }
+
+    function resetToStep1() {
+      document.getElementById("step2").classList.add("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function resetAll() {
+      document.getElementById("jd-input").value = "";
+      resetToStep1();
+    }
+  </script>
+</body>
+</html>
