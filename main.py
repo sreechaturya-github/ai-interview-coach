@@ -26,6 +26,7 @@ llm = ChatGroq(
 class JobDescRequest(BaseModel):
     job_description: str
     difficulty: str = "Medium"
+    resume_text: str = ""
 
 
 class MoreQuestionsRequest(BaseModel):
@@ -33,12 +34,14 @@ class MoreQuestionsRequest(BaseModel):
     category: str
     existing_questions: list[str]
     difficulty: str = "Medium"
+    resume_text: str = ""
 
 
 class EvaluateRequest(BaseModel):
     job_description: str
     question: str
     answer: str
+    resume_text: str = ""
 
 
 question_prompt = ChatPromptTemplate.from_messages([
@@ -49,6 +52,12 @@ Difficulty guide:
 - Easy: Basic concepts, simple past experiences, straightforward scenarios. Good for freshers or entry-level.
 - Medium: Moderate depth, requires some real experience, involves trade-offs or decisions.
 - Hard: Deep expertise, complex problem-solving, leadership, system design, or high-pressure scenarios.
+
+{resume_section}
+
+If a resume is provided, make questions SPECIFIC to the candidate's projects, skills, and experience mentioned in it.
+For example, if the resume mentions a project called "Book Nook", ask about it directly.
+Mix resume-specific questions with general role-based questions.
 
 Return ONLY a JSON object, no markdown, no extra text:
 {{
@@ -65,6 +74,10 @@ more_questions_prompt = ChatPromptTemplate.from_messages([
 Generate exactly 5 MORE {difficulty}-level {category} interview questions for the given job description.
 Do NOT repeat any of the existing questions provided.
 
+{resume_section}
+
+If a resume is provided, make some questions specific to the candidate's background.
+
 Return ONLY a JSON array of 5 strings, no markdown, no extra text:
 ["question 1", "question 2", "question 3", "question 4", "question 5"]
 """),
@@ -76,18 +89,28 @@ Existing questions (do not repeat):
 
 evaluate_prompt = ChatPromptTemplate.from_messages([
     ("system", """You are a senior interview coach who gives honest, constructive feedback.
-Evaluate the candidate's answer and return ONLY a JSON object, no markdown, no extra text:
+
+{resume_section}
+
+Evaluate the candidate's answer considering their background if a resume is provided.
+Return ONLY a JSON object, no markdown, no extra text:
 {{
   "score": <integer 1-10>,
   "verdict": "<Poor / Needs Work / Good / Strong / Excellent>",
   "strengths": ["<strength 1>", "<strength 2>"],
   "improvements": ["<improvement 1>", "<improvement 2>"],
-  "sample_answer": "<A strong 3-4 sentence model answer>"
+  "sample_answer": "<A strong 3-4 sentence model answer tailored to this candidate's background>"
 }}"""),
     ("human", """Job Description: {job_description}
 Question: {question}
 Answer: {answer}""")
 ])
+
+
+def build_resume_section(resume_text: str) -> str:
+    if resume_text.strip():
+        return f"Candidate's Resume:\n{resume_text.strip()}"
+    return "No resume provided — generate general role-based questions."
 
 
 @app.get("/")
@@ -100,11 +123,11 @@ async def generate_questions(req: JobDescRequest):
     chain = question_prompt | llm
     result = chain.invoke({
         "job_description": req.job_description,
-        "difficulty": req.difficulty
+        "difficulty": req.difficulty,
+        "resume_section": build_resume_section(req.resume_text)
     })
     try:
-        content = result.content if isinstance(result.content, str) else str(result.content)
-        questions = json.loads(content)
+        questions = json.loads(str(result.content))
         return {"questions": questions}
     except Exception:
         return {"error": "Failed to parse questions.", "raw": result.content}
@@ -117,11 +140,11 @@ async def more_questions(req: MoreQuestionsRequest):
         "difficulty": req.difficulty,
         "category": req.category,
         "job_description": req.job_description,
-        "existing_questions": "\n".join(req.existing_questions)
+        "existing_questions": "\n".join(req.existing_questions),
+        "resume_section": build_resume_section(req.resume_text)
     })
     try:
-        content = result.content if isinstance(result.content, str) else str(result.content)
-        questions = json.loads(content)
+        questions = json.loads(str(result.content))
         return {"questions": questions}
     except Exception:
         return {"error": "Failed to parse questions.", "raw": result.content}
@@ -134,10 +157,10 @@ async def evaluate_answer(req: EvaluateRequest):
         "job_description": req.job_description,
         "question": req.question,
         "answer": req.answer,
+        "resume_section": build_resume_section(req.resume_text)
     })
     try:
-        content = result.content if isinstance(result.content, str) else str(result.content)
-        feedback = json.loads(content)
+        feedback = json.loads(str(result.content))
         return {"feedback": feedback}
     except Exception:
         return {"error": "Failed to parse feedback.", "raw": result.content}

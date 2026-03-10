@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PrepCoach — AI Interview Trainer</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Instrument+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --cream: #f5f0e8;
       --paper: #faf7f2;
       --ink: #1a1612;
       --ink2: #3d3830;
@@ -60,11 +60,7 @@
 
     .logo span { color: #8fbc9e; }
 
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 1.2rem;
-    }
+    .header-right { display: flex; align-items: center; gap: 1.2rem; }
 
     .header-tag {
       font-family: 'JetBrains Mono', monospace;
@@ -101,7 +97,6 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-family: 'JetBrains Mono', monospace;
     }
 
     main {
@@ -139,14 +134,9 @@
 
     .hero h1 em { font-style: italic; color: var(--green); }
 
-    .hero p {
-      color: var(--muted);
-      font-size: 0.95rem;
-      max-width: 520px;
-      line-height: 1.7;
-    }
+    .hero p { color: var(--muted); font-size: 0.95rem; max-width: 520px; line-height: 1.7; }
 
-    .jd-label {
+    .field-label {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.65rem;
       letter-spacing: 0.1em;
@@ -171,19 +161,135 @@
       line-height: 1.75;
     }
 
-    textarea:focus {
-      border-color: var(--green);
-      box-shadow: 0 0 0 3px rgba(30,77,59,0.08);
-    }
-
+    textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(30,77,59,0.08); }
     textarea::placeholder { color: #c0b8ac; }
 
-    /* DIFFICULTY TOGGLE */
+    /* RESUME */
+    .resume-section {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px dashed var(--border);
+    }
+
+    .resume-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .resume-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .resume-optional {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--muted);
+      background: #f0ece4;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+    }
+
+    .resume-tabs {
+      display: flex;
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      width: fit-content;
+      margin-bottom: 1rem;
+    }
+
+    .resume-tab {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      padding: 0.45rem 1.1rem;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all 0.18s;
+    }
+
+    .resume-tab.active { background: var(--green); color: #f5f0e8; }
+
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+      position: relative;
+    }
+
+    .upload-zone:hover, .upload-zone.drag-over { border-color: var(--green); background: var(--green-light); }
+
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .upload-icon { font-size: 2rem; margin-bottom: 0.6rem; }
+    .upload-text { font-size: 0.88rem; color: var(--ink2); margin-bottom: 0.3rem; }
+    .upload-sub { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--muted); }
+
+    .resume-success {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--green-light);
+      border: 1.5px solid #a8d4b8;
+      border-radius: 10px;
+      padding: 1rem 1.3rem;
+    }
+
+    .resume-success-icon { font-size: 1.5rem; }
+
+    .resume-success-name {
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--green);
+    }
+
+    .resume-success-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      color: #5a8a6a;
+      margin-top: 0.2rem;
+    }
+
+    .resume-clear-btn {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      transition: color 0.2s;
+    }
+
+    .resume-clear-btn:hover { color: #b83232; }
+
+    /* DIFFICULTY */
     .difficulty-row {
       display: flex;
       align-items: center;
       gap: 1rem;
-      margin-top: 1.2rem;
+      margin-top: 1.5rem;
       flex-wrap: wrap;
     }
 
@@ -212,10 +318,7 @@
       cursor: pointer;
       color: var(--muted);
       transition: all 0.18s;
-      letter-spacing: 0.05em;
     }
-
-    .diff-btn:hover { color: var(--ink); }
 
     .diff-btn.active-easy   { background: #e8f5e9; color: #2d7a4f; font-weight: 600; }
     .diff-btn.active-medium { background: #fff8e1; color: #b8860b; font-weight: 600; }
@@ -292,12 +395,7 @@
       gap: 0.8rem;
     }
 
-    .section-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
     .category-grid {
       display: grid;
@@ -344,7 +442,6 @@
       border-radius: 20px;
     }
 
-    /* DIFFICULTY PILL on category */
     .diff-pill {
       display: inline-block;
       margin-top: 0.4rem;
@@ -361,12 +458,7 @@
 
     #questions-panel { animation: fadeUp 0.3s ease; }
 
-    .questions-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      margin-top: 1rem;
-    }
+    .questions-list { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1rem; }
 
     .q-item {
       background: white;
@@ -378,7 +470,6 @@
       align-items: flex-start;
       gap: 1rem;
       transition: all 0.18s;
-      position: relative;
     }
 
     .q-item:hover { border-color: #aaa; background: #fdfcfa; }
@@ -386,15 +477,7 @@
     .q-item.bookmarked { border-color: #f0c060; background: #fffdf0; }
     .q-item.bookmarked.selected { border-color: var(--green); background: var(--green-light); }
 
-    .q-num {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      color: var(--muted);
-      min-width: 20px;
-      margin-top: 2px;
-      flex-shrink: 0;
-    }
-
+    .q-num { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted); min-width: 20px; margin-top: 2px; flex-shrink: 0; }
     .q-text { font-size: 0.87rem; line-height: 1.6; color: var(--ink2); flex: 1; }
 
     .bookmark-btn {
@@ -438,40 +521,15 @@
       justify-content: space-between;
     }
 
-    .bp-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #f5f0e8;
-    }
+    .bp-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: #f5f0e8; }
 
-    .bp-close {
-      background: none;
-      border: none;
-      color: #8fbc9e;
-      font-size: 1.3rem;
-      cursor: pointer;
-      line-height: 1;
-      transition: color 0.2s;
-    }
-
+    .bp-close { background: none; border: none; color: #8fbc9e; font-size: 1.3rem; cursor: pointer; transition: color 0.2s; }
     .bp-close:hover { color: #f5f0e8; }
 
-    .bp-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1.5rem;
-    }
+    .bp-body { flex: 1; overflow-y: auto; padding: 1.5rem; }
 
-    .bp-empty {
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.85rem;
-      margin-top: 3rem;
-      line-height: 1.7;
-    }
-
-    .bp-empty .bp-empty-icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+    .bp-empty { text-align: center; color: var(--muted); font-size: 0.85rem; margin-top: 3rem; line-height: 1.7; }
+    .bp-empty-icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
 
     .bp-item {
       background: white;
@@ -497,21 +555,9 @@
       justify-content: space-between;
     }
 
-    .bp-item-text {
-      font-size: 0.83rem;
-      line-height: 1.55;
-      color: var(--ink2);
-    }
+    .bp-item-text { font-size: 0.83rem; line-height: 1.55; color: var(--ink2); }
 
-    .bp-remove {
-      background: none;
-      border: none;
-      color: #ccc;
-      cursor: pointer;
-      font-size: 0.8rem;
-      transition: color 0.2s;
-    }
-
+    .bp-remove { background: none; border: none; color: #ccc; cursor: pointer; font-size: 0.8rem; transition: color 0.2s; }
     .bp-remove:hover { color: #b83232; }
 
     #answer-section { animation: fadeUp 0.3s ease; }
@@ -554,98 +600,36 @@
       color: #f5f0e8;
     }
 
-    .score-num {
-      font-family: 'Playfair Display', serif;
-      font-size: 3rem;
-      font-weight: 900;
-      line-height: 1;
-      color: #8fbc9e;
-    }
-
-    .score-denom {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      color: #8fbc9e;
-    }
-
-    .verdict-text {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: #f5f0e8;
-    }
-
+    .score-num { font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 900; line-height: 1; color: #8fbc9e; }
+    .score-denom { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #8fbc9e; }
+    .verdict-text { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: #f5f0e8; }
     .verdict-sub { font-size: 0.78rem; color: #8fbc9e; margin-top: 0.2rem; }
 
-    .feedback-cols {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-bottom: 1.2rem;
-    }
-
+    .feedback-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.2rem; }
     @media (max-width: 600px) { .feedback-cols { grid-template-columns: 1fr; } }
 
-    .fb-card {
-      background: white;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      padding: 1.1rem 1.3rem;
-    }
+    .fb-card { background: white; border: 1.5px solid var(--border); border-radius: 10px; padding: 1.1rem 1.3rem; }
 
-    .fb-card-title {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.62rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-bottom: 0.8rem;
-    }
+    .fb-card-title { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.8rem; }
 
     .fb-card.strengths .fb-card-title { color: #2d7a4f; }
     .fb-card.improvements .fb-card-title { color: var(--orange); }
     .fb-card ul { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
 
-    .fb-card li {
-      font-size: 0.83rem;
-      line-height: 1.55;
-      color: var(--ink2);
-      display: flex;
-      gap: 0.6rem;
-      align-items: flex-start;
-    }
-
+    .fb-card li { font-size: 0.83rem; line-height: 1.55; color: var(--ink2); display: flex; gap: 0.6rem; align-items: flex-start; }
     .fb-card.strengths li::before { content: '✓'; color: #2d7a4f; flex-shrink: 0; font-weight: 700; }
     .fb-card.improvements li::before { content: '→'; color: var(--orange); flex-shrink: 0; }
 
-    .model-answer-box {
-      background: white;
-      border: 1.5px solid var(--border);
-      border-left: 4px solid var(--green);
-      border-radius: 10px;
-      padding: 1.2rem 1.4rem;
-    }
-
+    .model-answer-box { background: white; border: 1.5px solid var(--border); border-left: 4px solid var(--green); border-radius: 10px; padding: 1.2rem 1.4rem; }
     .model-answer-box .fb-card-title { color: var(--green); font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.7rem; }
     .model-answer-box p { font-size: 0.87rem; line-height: 1.8; color: var(--ink2); }
 
-    .loader {
-      display: inline-block;
-      width: 15px; height: 15px;
-      border: 2px solid rgba(245,240,232,0.4);
-      border-top-color: #f5f0e8;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-    }
+    .loader { display: inline-block; width: 15px; height: 15px; border: 2px solid rgba(245,240,232,0.4); border-top-color: #f5f0e8; border-radius: 50%; animation: spin 0.6s linear infinite; }
 
     .divider { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(14px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes spin { to { transform: rotate(360deg); } }
-
     .hidden { display: none !important; }
   </style>
 </head>
@@ -661,7 +645,7 @@
     </div>
   </header>
 
-  <!-- BOOKMARKS SIDE PANEL -->
+  <!-- BOOKMARKS PANEL -->
   <div id="bookmarks-panel">
     <div class="bp-header">
       <span class="bp-title">Bookmarked Questions</span>
@@ -680,14 +664,54 @@
     <div class="hero">
       <p class="hero-label">Your AI-Powered Coach</p>
       <h1>Ace your next<br><em>interview.</em></h1>
-      <p>Paste a job description, set your difficulty, choose a category, and practice with real questions tailored to the role.</p>
+      <p>Paste a job description, upload your resume, and practice with questions tailored specifically to you.</p>
     </div>
 
     <!-- STEP 1 -->
     <section id="step1">
-      <span class="jd-label">01 — Job Description</span>
-      <textarea id="jd-input" rows="8" placeholder="Paste the job description here. The more detail you include, the more relevant your questions will be..."></textarea>
+      <span class="field-label">01 — Job Description</span>
+      <textarea id="jd-input" rows="7" placeholder="Paste the job description here..."></textarea>
 
+      <!-- RESUME -->
+      <div class="resume-section">
+        <div class="resume-header">
+          <span class="resume-title">📄 Your Resume</span>
+          <span class="resume-optional">Optional — but recommended for freshers!</span>
+        </div>
+
+        <div class="resume-tabs">
+          <button class="resume-tab active" id="tab-upload" onclick="switchResumeTab('upload')">📎 Upload PDF</button>
+          <button class="resume-tab" id="tab-paste" onclick="switchResumeTab('paste')">✏️ Paste Text</button>
+        </div>
+
+        <div id="resume-upload-panel">
+          <div id="upload-zone" class="upload-zone"
+            ondragover="handleDragOver(event)"
+            ondragleave="handleDragLeave(event)"
+            ondrop="handleDrop(event)">
+            <input type="file" accept=".pdf" onchange="handleFileInput(event)" />
+            <div class="upload-icon">📄</div>
+            <div class="upload-text">Drag & drop your resume PDF here</div>
+            <div class="upload-sub">or click to browse · PDF only</div>
+          </div>
+          <div id="resume-success" class="resume-success hidden">
+            <span class="resume-success-icon">✅</span>
+            <div>
+              <div class="resume-success-name" id="resume-filename">resume.pdf</div>
+              <div class="resume-success-sub" id="resume-charcount"></div>
+            </div>
+            <button class="resume-clear-btn" onclick="clearResume()">✕ Remove</button>
+          </div>
+        </div>
+
+        <div id="resume-paste-panel" class="hidden">
+          <textarea id="resume-paste-input" rows="7"
+            placeholder="Paste your resume text here — skills, projects, experience, education..."
+            oninput="handleResumePaste()"></textarea>
+        </div>
+      </div>
+
+      <!-- DIFFICULTY -->
       <div class="difficulty-row">
         <span class="difficulty-label">Difficulty:</span>
         <div class="difficulty-toggle">
@@ -706,7 +730,7 @@
     <!-- STEP 2 -->
     <section id="step2" class="hidden">
       <hr class="divider"/>
-      <div class="section-label" id="step2-label">02 — Choose a Category</div>
+      <div class="section-label">02 — Choose a Category</div>
 
       <div class="category-grid">
         <div class="cat-card" id="cat-technical" onclick="selectCategory('Technical')">
@@ -732,11 +756,9 @@
         </div>
       </div>
 
-      <!-- Questions Panel -->
       <div id="questions-panel" class="hidden">
         <div class="section-label" id="questions-panel-label">Technical Questions</div>
         <div class="questions-list" id="questions-list"></div>
-
         <button class="btn-secondary hidden" id="more-btn" onclick="loadMoreQuestions()" style="margin-top:1rem;">
           <span id="more-btn-text">+ Load More Questions</span>
           <span class="loader hidden" id="more-loader" style="border-color:rgba(0,0,0,0.2);border-top-color:var(--ink);"></span>
@@ -800,12 +822,72 @@
   </main>
 
   <script>
-const API = "https://ai-interview-coach-tan6.onrender.com";    let jobDescription = "";
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const API = "https://ai-interview-coach-tan6.onrender.com";
+    let jobDescription = "";
     let allQuestions = {};
     let selectedCategory = "";
     let selectedQuestion = "";
     let currentDifficulty = "Easy";
-    let bookmarks = []; // { question, category }
+    let resumeText = "";
+    let bookmarks = [];
+
+    // ---- RESUME TABS ----
+    function switchResumeTab(tab) {
+      document.getElementById("tab-upload").classList.toggle("active", tab === "upload");
+      document.getElementById("tab-paste").classList.toggle("active", tab === "paste");
+      document.getElementById("resume-upload-panel").classList.toggle("hidden", tab !== "upload");
+      document.getElementById("resume-paste-panel").classList.toggle("hidden", tab !== "paste");
+      if (tab === "paste") resumeText = document.getElementById("resume-paste-input").value.trim();
+    }
+
+    // ---- PDF UPLOAD ----
+    function handleDragOver(e) { e.preventDefault(); document.getElementById("upload-zone").classList.add("drag-over"); }
+    function handleDragLeave(e) { document.getElementById("upload-zone").classList.remove("drag-over"); }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      document.getElementById("upload-zone").classList.remove("drag-over");
+      const file = e.dataTransfer.files[0];
+      if (file && file.type === "application/pdf") processPDF(file);
+      else alert("Please upload a PDF file.");
+    }
+
+    function handleFileInput(e) {
+      const file = e.target.files[0];
+      if (file) processPDF(file);
+    }
+
+    async function processPDF(file) {
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let text = "";
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          text += content.items.map(item => item.str).join(" ") + "\n";
+        }
+        resumeText = text.trim();
+        document.getElementById("upload-zone").classList.add("hidden");
+        document.getElementById("resume-success").classList.remove("hidden");
+        document.getElementById("resume-filename").textContent = file.name;
+        document.getElementById("resume-charcount").textContent = `${resumeText.length.toLocaleString()} characters extracted`;
+      } catch (err) {
+        alert("Could not read PDF. Try the paste option instead.");
+      }
+    }
+
+    function clearResume() {
+      resumeText = "";
+      document.getElementById("upload-zone").classList.remove("hidden");
+      document.getElementById("resume-success").classList.add("hidden");
+    }
+
+    function handleResumePaste() {
+      resumeText = document.getElementById("resume-paste-input").value.trim();
+    }
 
     // ---- DIFFICULTY ----
     function setDifficulty(level) {
@@ -826,20 +908,21 @@ const API = "https://ai-interview-coach-tan6.onrender.com";    let jobDescriptio
       const btn = document.getElementById("generate-btn");
       const txt = document.getElementById("gen-btn-text");
       const loader = document.getElementById("gen-loader");
-      btn.disabled = true; txt.textContent = "Generating..."; loader.classList.remove("hidden");
+      btn.disabled = true;
+      txt.textContent = resumeText ? "Personalizing questions..." : "Generating...";
+      loader.classList.remove("hidden");
 
       try {
         const res = await fetch(`${API}/generate-questions`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ job_description: jd, difficulty: currentDifficulty })
+          body: JSON.stringify({ job_description: jd, difficulty: currentDifficulty, resume_text: resumeText })
         });
         const data = await res.json();
         if (data.error) return alert("Error: " + data.error);
 
         allQuestions = data.questions;
 
-        // Update difficulty pills on category cards
         ["technical", "behavioral", "situational"].forEach(c => {
           const pill = document.getElementById(`pill-${c}`);
           pill.textContent = currentDifficulty;
@@ -855,9 +938,11 @@ const API = "https://ai-interview-coach-tan6.onrender.com";    let jobDescriptio
         document.getElementById("step2").scrollIntoView({ behavior: "smooth" });
 
       } catch (e) {
-        alert("Could not connect to backend. Make sure FastAPI is running on port 8000.");
+        alert("Could not connect to backend. Make sure the server is running.");
       } finally {
-        btn.disabled = false; txt.textContent = "Generate Questions"; loader.classList.add("hidden");
+        btn.disabled = false;
+        txt.textContent = "Generate Questions";
+        loader.classList.add("hidden");
       }
     }
 
@@ -867,9 +952,7 @@ const API = "https://ai-interview-coach-tan6.onrender.com";    let jobDescriptio
       document.querySelectorAll(".cat-card").forEach(c => c.classList.remove("active"));
       document.getElementById(`cat-${category.toLowerCase()}`).classList.add("active");
 
-      const questions = allQuestions[category] || [];
-      renderQuestionsList(questions);
-
+      renderQuestionsList(allQuestions[category] || []);
       document.getElementById("questions-panel-label").textContent = `${category} Questions`;
       document.getElementById("questions-panel").classList.remove("hidden");
       document.getElementById("more-btn").classList.remove("hidden");
@@ -891,11 +974,8 @@ const API = "https://ai-interview-coach-tan6.onrender.com";    let jobDescriptio
         item.innerHTML = `
           <span class="q-num">${String(startIndex + i + 1).padStart(2, '0')}</span>
           <span class="q-text">${q}</span>
-          <button class="bookmark-btn ${isBookmarked ? 'active' : ''}"
-            title="${isBookmarked ? 'Remove bookmark' : 'Bookmark this question'}"
-            onclick="toggleBookmark(event, '${q.replace(/'/g, "\\'")}', this, arguments[0].currentTarget.parentElement)">
-            ${isBookmarked ? '🔖' : '🔖'}
-          </button>
+          <button class="bookmark-btn ${isBookmarked ? 'active' : ''}" title="Bookmark"
+            onclick="toggleBookmark(event, this, this.parentElement)">🔖</button>
         `;
         item.querySelector('.q-text').onclick = () => selectQuestion(item, q);
         item.querySelector('.q-num').onclick = () => selectQuestion(item, q);
@@ -904,8 +984,9 @@ const API = "https://ai-interview-coach-tan6.onrender.com";    let jobDescriptio
     }
 
     // ---- BOOKMARKS ----
-    function toggleBookmark(e, question, btn, card) {
+    function toggleBookmark(e, btn, card) {
       e.stopPropagation();
+      const question = card.dataset.question;
       const idx = bookmarks.findIndex(b => b.question === question);
       if (idx === -1) {
         bookmarks.push({ question, category: selectedCategory });
@@ -934,11 +1015,9 @@ const API = "https://ai-interview-coach-tan6.onrender.com";    let jobDescriptio
         body.innerHTML = `<div class="bp-empty"><div class="bp-empty-icon">🔖</div>No bookmarks yet.<br/>Click the bookmark icon on any question to save it here.</div>`;
         return;
       }
-
       body.innerHTML = bookmarks.map((b, i) => `
         <div class="bp-item" onclick="jumpToQuestion('${b.question.replace(/'/g, "\\'")}', '${b.category}')">
-          <div class="bp-item-cat">
-            ${b.category}
+          <div class="bp-item-cat">${b.category}
             <button class="bp-remove" onclick="removeBookmark(event, ${i})">✕</button>
           </div>
           <div class="bp-item-text">${b.question}</div>
@@ -948,14 +1027,11 @@ const API = "https://ai-interview-coach-tan6.onrender.com";    let jobDescriptio
 
     function removeBookmark(e, idx) {
       e.stopPropagation();
-      bookmarks.splice(idx, 1);
+      const removed = bookmarks.splice(idx, 1)[0];
       updateBookmarkCount();
       renderBookmarksPanel();
-      // Update card UI if visible
       document.querySelectorAll(".q-item").forEach(card => {
-        const q = card.dataset.question;
-        const stillBookmarked = bookmarks.some(b => b.question === q);
-        if (!stillBookmarked) {
+        if (card.dataset.question === removed.question) {
           card.classList.remove("bookmarked");
           const btn = card.querySelector(".bookmark-btn");
           if (btn) btn.classList.remove("active");
@@ -965,14 +1041,9 @@ const API = "https://ai-interview-coach-tan6.onrender.com";    let jobDescriptio
 
     function jumpToQuestion(question, category) {
       toggleBookmarksPanel();
-      // Switch to correct category first
-      if (category !== selectedCategory) {
-        selectCategory(category);
-      }
-      // Find and click the question
+      if (category !== selectedCategory) selectCategory(category);
       setTimeout(() => {
-        const items = document.querySelectorAll(".q-item");
-        items.forEach(item => {
+        document.querySelectorAll(".q-item").forEach(item => {
           if (item.dataset.question === question) {
             item.scrollIntoView({ behavior: "smooth", block: "center" });
             selectQuestion(item, question);
@@ -986,7 +1057,6 @@ const API = "https://ai-interview-coach-tan6.onrender.com";    let jobDescriptio
       document.querySelectorAll(".q-item").forEach(i => i.classList.remove("selected"));
       item.classList.add("selected");
       selectedQuestion = question;
-
       document.getElementById("selected-q-display").textContent = question;
       document.getElementById("answer-input").value = "";
       document.getElementById("feedback-section").classList.add("hidden");
@@ -1011,13 +1081,13 @@ const API = "https://ai-interview-coach-tan6.onrender.com";    let jobDescriptio
             job_description: jobDescription,
             category: selectedCategory,
             existing_questions: existing,
-            difficulty: currentDifficulty
+            difficulty: currentDifficulty,
+            resume_text: resumeText
           })
         });
         const data = await res.json();
         if (data.error) return alert("Error: " + data.error);
         renderQuestionsList(data.questions, true);
-
       } catch (e) {
         alert("Could not connect to backend.");
       } finally {
@@ -1039,15 +1109,18 @@ const API = "https://ai-interview-coach-tan6.onrender.com";    let jobDescriptio
         const res = await fetch(`${API}/evaluate-answer`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ job_description: jobDescription, question: selectedQuestion, answer })
+          body: JSON.stringify({
+            job_description: jobDescription,
+            question: selectedQuestion,
+            answer,
+            resume_text: resumeText
+          })
         });
         const data = await res.json();
         if (data.error) return alert("Error: " + data.error);
-
         renderFeedback(data.feedback);
         document.getElementById("feedback-section").classList.remove("hidden");
         document.getElementById("feedback-section").scrollIntoView({ behavior: "smooth" });
-
       } catch (e) {
         alert("Could not connect to backend.");
       } finally {
